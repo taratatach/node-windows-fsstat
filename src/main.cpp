@@ -220,7 +220,7 @@ std::wstring utf8Decode(const std::string &str)
   if( str.empty() ) return std::wstring();
   int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
   std::wstring wstrTo( size_needed, 0 );
-  MultiByteToWideChar                  (CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
+  MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
   return wstrTo;
 }
 
@@ -254,7 +254,8 @@ long double getMiliTimestamp(LARGE_INTEGER ts)
 
 NAN_METHOD(lstatSync) {
   Nan:: HandleScope scope;
-  v8::String::Utf8Value param1(info[0]->ToString());
+  v8::Isolate* isolate = v8::Isolate::GetCurrent();
+  v8::String::Utf8Value param1(isolate, Nan::To<v8::String>(info[0]).ToLocalChecked());
   std::string from = std::string(*param1);
 
   std::string directory;
@@ -278,8 +279,6 @@ NAN_METHOD(lstatSync) {
   std::wstring tmp_node = utf8Decode(node);
   LPCWSTR w_node = tmp_node.c_str();
 
-  v8::Isolate* isolate = v8::Isolate::GetCurrent();
-
   try {
     PFILE_ID_FULL_DIR_INFORMATION stats = DumpFileInformation (w_directory, w_node);
     Local<Object> obj = Object::New(isolate);
@@ -287,26 +286,50 @@ NAN_METHOD(lstatSync) {
     char fileId [50];
     sprintf(fileId, "0x%08X%08X", stats->FileId.HighPart, stats->FileId.LowPart);
 
-    obj->Set(String::NewFromUtf8(isolate, "fileid"),
-        String::NewFromUtf8(isolate, fileId));
-    obj->Set(String::NewFromUtf8(isolate, "ino"),
-        Number::New(isolate, largeIntegerToLongDouble(stats->FileId)));
-    obj->Set(String::NewFromUtf8(isolate, "size"),
-        Number::New(isolate, largeIntegerToLongDouble(stats->EndOfFile)));
-    obj->Set(String::NewFromUtf8(isolate, "atime"),
-        Date::New(isolate, getMiliTimestamp(stats->LastAccessTime)));
-    obj->Set(String::NewFromUtf8(isolate, "mtime"),
-        Date::New(isolate, getMiliTimestamp(stats->LastWriteTime)));
-    obj->Set(String::NewFromUtf8(isolate, "ctime"),
-        Date::New(isolate, getMiliTimestamp(stats->CreationTime)));
-    obj->Set(String::NewFromUtf8(isolate, "directory"),
-        Boolean::New(isolate, (stats->FileAttributes & FILE_ATTRIBUTE_DIRECTORY)));
-    obj->Set(String::NewFromUtf8(isolate, "symbolicLink"),
-        Boolean::New(isolate, (stats->FileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)));
+    obj->Set(
+        Nan::GetCurrentContext(),
+        String::NewFromUtf8(isolate, "fileid", v8::NewStringType::kNormal).ToLocalChecked(), 
+        String::NewFromUtf8(isolate, fileId, v8::NewStringType::kNormal).ToLocalChecked()
+        );
+    obj->Set(
+        Nan::GetCurrentContext(),
+        String::NewFromUtf8(isolate, "ino", v8::NewStringType::kNormal).ToLocalChecked(),
+        Number::New(isolate, largeIntegerToLongDouble(stats->FileId))
+        );
+    obj->Set(
+        Nan::GetCurrentContext(),
+        String::NewFromUtf8(isolate, "size", v8::NewStringType::kNormal).ToLocalChecked(),
+        Number::New(isolate, largeIntegerToLongDouble(stats->EndOfFile))
+        );
+    obj->Set(
+        Nan::GetCurrentContext(),
+        String::NewFromUtf8(isolate, "atime", v8::NewStringType::kNormal).ToLocalChecked(),
+        Date::New(Nan::GetCurrentContext(), getMiliTimestamp(stats->LastAccessTime)).ToLocalChecked()
+        );
+    obj->Set(
+        Nan::GetCurrentContext(),
+        String::NewFromUtf8(isolate, "mtime", v8::NewStringType::kNormal).ToLocalChecked(),
+        Date::New(Nan::GetCurrentContext(), getMiliTimestamp(stats->LastWriteTime)).ToLocalChecked()
+        );
+    obj->Set(
+        Nan::GetCurrentContext(),
+        String::NewFromUtf8(isolate, "ctime", v8::NewStringType::kNormal).ToLocalChecked(),
+        Date::New(Nan::GetCurrentContext(), getMiliTimestamp(stats->CreationTime)).ToLocalChecked()
+        );
+    obj->Set(
+        Nan::GetCurrentContext(),
+        String::NewFromUtf8(isolate, "directory", v8::NewStringType::kNormal).ToLocalChecked(),
+        Boolean::New(isolate, (stats->FileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+        );
+    obj->Set(
+        Nan::GetCurrentContext(),
+        String::NewFromUtf8(isolate, "symbolicLink", v8::NewStringType::kNormal).ToLocalChecked(),
+        Boolean::New(isolate, (stats->FileAttributes & FILE_ATTRIBUTE_REPARSE_POINT))
+        );
 
     info.GetReturnValue().Set(obj);
   } catch(std::exception& e) {
-    isolate->ThrowException(String::NewFromUtf8(isolate, e.what()));
+    isolate->ThrowException(String::NewFromUtf8(isolate, e.what(), v8::NewStringType::kNormal).ToLocalChecked());
     return info.GetReturnValue().Set(Undefined());
   }
 }
