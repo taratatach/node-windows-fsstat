@@ -255,7 +255,7 @@ long double getMiliTimestamp(LARGE_INTEGER ts)
 NAN_METHOD(lstatSync) {
     Nan:: HandleScope scope;
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    v8::String::Utf8Value param1(isolate, Nan::To<v8::String>(info[0]).ToLocalChecked());
+    v8::String::Utf8Value param1(info[0]->ToString());
     std::string from = std::string(*param1);
 
     std::string directory;
