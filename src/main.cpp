@@ -254,6 +254,7 @@ long double getMiliTimestamp(LARGE_INTEGER ts)
 
 NAN_METHOD(lstatSync) {
     Nan:: HandleScope scope;
+    v8::Isolate* isolate = v8::Isolate::GetCurrent();
     v8::String::Utf8Value param1(info[0]->ToString());
     std::string from = std::string(*param1);
 
@@ -278,8 +279,6 @@ NAN_METHOD(lstatSync) {
     std::wstring tmp_node = utf8Decode(node);
     LPCWSTR w_node = tmp_node.c_str();
 
-	  v8::Isolate* isolate = v8::Isolate::GetCurrent();
-
 	  try {
         PFILE_ID_FULL_DIR_INFORMATION stats = DumpFileInformation (w_directory, w_node);
         Local<Object> obj = Object::New(isolate);
@@ -294,11 +293,14 @@ NAN_METHOD(lstatSync) {
         obj->Set(String::NewFromUtf8(isolate, "size"),
           Number::New(isolate, largeIntegerToLongDouble(stats->EndOfFile)));
         obj->Set(String::NewFromUtf8(isolate, "atime"),
-          Date::New(isolate, getMiliTimestamp(stats->LastAccessTime)));
+          Date::New(Nan::GetCurrentContext(), getMiliTimestamp(stats->LastAccessTime)).ToLocalChecked()
+        );
         obj->Set(String::NewFromUtf8(isolate, "mtime"),
-          Date::New(isolate, getMiliTimestamp(stats->LastWriteTime)));
+          Date::New(Nan::GetCurrentContext(), getMiliTimestamp(stats->LastWriteTime)).ToLocalChecked()
+        );
         obj->Set(String::NewFromUtf8(isolate, "ctime"),
-          Date::New(isolate, getMiliTimestamp(stats->CreationTime)));
+          Date::New(Nan::GetCurrentContext(), getMiliTimestamp(stats->CreationTime)).ToLocalChecked()
+        );
         obj->Set(String::NewFromUtf8(isolate, "directory"),
           Boolean::New(isolate, (stats->FileAttributes & FILE_ATTRIBUTE_DIRECTORY)));
         obj->Set(String::NewFromUtf8(isolate, "symbolicLink"),
