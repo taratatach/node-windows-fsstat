@@ -1,6 +1,6 @@
 {
   "name": "@gyselroth/windows-fsstat",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "fstat module for Windows (unique inode fix)",
   "main": "main.js",
   "scripts": {
