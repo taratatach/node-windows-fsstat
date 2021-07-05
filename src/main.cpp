@@ -6,8 +6,8 @@
 #include <iomanip>
 #include <sstream>
 
-#define WINDOWS_TICK 10000000
-#define SEC_TO_UNIX_EPOCH 11644473600LL
+#define WINDOWS_TICK_TO_MS 10000
+#define MS_TO_UNIX_EPOCH 11644473600000LL
 
 using namespace Nan;
 using namespace v8;
@@ -224,9 +224,9 @@ std::wstring utf8Decode(const std::string &str)
   return wstrTo;
 }
 
-long double WindowsTickToUnixSeconds(long long windowsTicks)
+long double WindowsTickToUnixMilliSeconds(long long windowsTicks)
 {
-  return (windowsTicks / WINDOWS_TICK - SEC_TO_UNIX_EPOCH);
+  return (windowsTicks / WINDOWS_TICK_TO_MS - MS_TO_UNIX_EPOCH);
 }
 
 
@@ -248,7 +248,7 @@ long double largeIntegerToLongDouble(LARGE_INTEGER number)
 
 long double getMiliTimestamp(LARGE_INTEGER ts)
 {
-  long double mili = WindowsTickToUnixSeconds(largeIntegerToLongDouble(ts)) * 1000;
+  long double mili = WindowsTickToUnixMilliSeconds(largeIntegerToLongDouble(ts));
   return mili;
 }
 
