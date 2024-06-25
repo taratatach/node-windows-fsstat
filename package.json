@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "electron": "30",
-    "electron-builder": "^22.8.1",
+    "electron-builder": "^23.6.0",
     "jest": "^23.6.0",
     "mkdirp": "^0.5.1"
   },
