@@ -31,7 +31,7 @@
     "test": "tests"
   },
   "devDependencies": {
-    "electron": "20",
+    "electron": "30",
     "electron-builder": "^22.8.1",
     "jest": "^23.6.0",
     "mkdirp": "^0.5.1"
