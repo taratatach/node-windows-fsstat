@@ -24,14 +24,14 @@
   "license": "MIT",
   "gypfile": true,
   "dependencies": {
-    "nan": "^2.20.0",
+    "nan": "^2.26.2",
     "node-gyp": "^10.1.0"
   },
   "directories": {
     "test": "tests"
   },
   "devDependencies": {
-    "electron": "30",
+    "electron": "39.8.3",
     "electron-builder": "^23.6.0",
     "jest": "^23.6.0",
     "mkdirp": "^0.5.1"
